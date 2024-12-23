@@ -3,181 +3,311 @@
 <head>
     <title>Medical Assistant</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        :root {
+            --primary-color: #2c7be5;
+            --secondary-color: #27ae60;
+            --accent-color: #e74c3c;
+            --background: #f8fafb;
+        }
+
         body {
-            font-family: 'Roboto', sans-serif;
-            line-height: 1.6;
+            font-family: 'Inter', sans-serif;
             margin: 0;
-            padding: 20px;
-            background-color: #f5f7fa;
+            padding: 0;
+            background: var(--background);
             color: #2c3e50;
+            display: flex; /* Replaces display: grid */
+            flex-wrap: nowrap;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+        .sidebar {
+            background: linear-gradient(180deg, #2c7be5 0%, #1a5bb7 100%);
+            padding: 2rem;
+            color: white;
+            position: relative; /* remove position: fixed */
+            min-height: 100vh; /* replaces height: 100vh with min-height */
+            width: 250px;
         }
 
-        h2 {
-            color: #3498db;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
-            margin-top: 30px;
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
         }
 
-        .error { 
-            color: #721c24;
-            background-color: #f8d7da;
-            border: 1px solid #f5c6cb;
+        .sidebar-logo i {
+            font-size: 2rem;
+        }
+
+        .nav-item {
+            padding: 1rem;
+            margin: 0.5rem 0;
             border-radius: 8px;
-            padding: 12px;
-            margin: 10px 0;
-            display: none;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
 
-        #chat-container, #diagnosis-container { 
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .main-content {
+            flex: 1; /* let main-content expand */
+            margin: 0; /* remove margin-left: 250px */
+            padding: 2rem;
+        }
+
+        .header {
             background: white;
+            padding: 1rem 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
             border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin: 20px 0;
-            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        #chat-container, #diagnosis-container {
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+            border: 2px solid rgba(0, 0, 0, 0.05);
+            border-radius: 24px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+            margin: 2rem 0;
+            padding: 2rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            font-size: 1.1rem;
+            line-height: 1.7;
+            letter-spacing: 0.02em;
+        }
+
+        #chat-container:hover, #diagnosis-container:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .input-group input[type="text"], textarea {
+            border-radius: 16px;
+            border: 2px solid #e5e7eb;
+        }
+
+        .input-group button, #diagnose-button {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border: none;
+            border-radius: 16px;
+            color: #fff;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .input-group button:hover, #diagnose-button:hover {
+            opacity: 0.9;
         }
 
         #chat-messages {
             height: 400px;
-            overflow-y: auto;
             border: 1px solid #e1e8ed;
-            border-radius: 8px;
-            padding: 20px;
-            background-color: #fff;
-            margin-bottom: 15px;
+            border-radius: 12px;
+            padding: 1rem;
+            background: #f8fafb;
+            margin-bottom: 1rem;
+            overflow-y: auto;
         }
 
         #chat-messages p {
-            margin: 8px 0;
-            padding: 8px 12px;
-            border-radius: 6px;
+            margin: 0.5rem 0;
+            padding: 1rem;
+            border-radius: 12px;
+            position: relative;
         }
 
         #chat-messages p:nth-child(odd) {
-            background-color: #f8f9fa;
-        }
-
-        input[type="text"], textarea {
-            width: calc(100% - 120px);
-            padding: 12px;
-            border: 1px solid #dce4ec;
-            border-radius: 6px;
-            margin-right: 10px;
-            font-size: 14px;
-        }
-
-        textarea {
-            width: calc(100% - 24px);
-            min-height: 100px;
-            margin-bottom: 15px;
-            resize: vertical;
-        }
-
-        button {
-            background-color: #3498db;
+            background: linear-gradient(135deg, var(--primary-color) 0%, #4a90e2 100%);
             color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: background-color 0.3s;
+            margin-right: 2rem;
+            border-top-left-radius: 0;
         }
 
-        button:hover {
-            background-color: #2980b9;
+        #chat-messages p:nth-child(even) {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, #2ecc71 100%);
+            color: white;
+            margin-left: 2rem;
+            border-top-right-radius: 0;
         }
 
-        #diagnosis-result {
-            white-space: pre-wrap;
-            font-family: 'Roboto', sans-serif;
-            line-height: 1.6;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 15px;
-            border: 1px solid #e1e8ed;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        .medical-info {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 1rem 0;
+            border-left: 4px solid var(--primary-color);
         }
 
-        .disclaimer {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #fff3cd;
-            border: 1px solid #ffeeba;
-            border-radius: 8px;
-            color: #856404;
-            position: relative;
-            padding-left: 45px;
+        .pulse-icon {
+            animation: pulse 2s infinite;
         }
 
-        .disclaimer:before {
-            content: "⚠️";
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 20px;
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
 
-        .error.show {
+        /* Custom scrollbar */
+        #chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #chat-messages::-webkit-scrollbar-track {
+            background: rgba(226, 232, 240, 0.5);
+            border-radius: 3px;
+        }
+
+        #chat-messages::-webkit-scrollbar-thumb {
+            background: #4299e1;
+            border-radius: 3px;
+        }
+
+        /* Each page hidden by default except #home-page */
+        #home-page, #chatbot-page, #diagnosis-page {
+            display: none;
+        }
+        /* Show home by default */
+        #home-page {
             display: block;
-            animation: fadeIn 0.3s ease-in;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .processing {
-            text-align: center;
-            padding: 20px;
-            color: #3498db;
-        }
-
-        .processing:after {
-            content: "...";
-            animation: dots 1.5s steps(5, end) infinite;
-        }
-
-        @keyframes dots {
-            0%, 20% { content: "."; }
-            40% { content: ".."; }
-            60%, 100% { content: "..."; }
+        #chat-container p, #diagnosis-container p {
+            margin-bottom: 1.2rem;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Medical Chatbot</h2>
-        <div id="chat-container">
-            <div id="chat-messages"></div>
-            <div id="chat-error" class="error"></div>
-            <input type="text" id="chat-input" placeholder="Ask about symptoms or medications...">
-            <button id="send-button">Send</button>
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <i class="fas fa-heartbeat pulse-icon"></i>
+            <h2>MedAssist</h2>
+        </div>
+        <div class="nav-item" data-target="#home-page">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </div>
+        <div class="nav-item" data-target="#chatbot-page">
+            <i class="fas fa-comment-medical"></i>
+            <span>Chat Consultation</span>
+        </div>
+        <div class="nav-item" data-target="#diagnosis-page">
+            <i class="fas fa-stethoscope"></i>
+            <span>Diagnosis</span>
+        </div>
+        <!-- Removed history and medication buttons -->
+    </div>
+
+    <div class="main-content">
+        <!-- Home page -->
+        <div id="home-page">
+            <div class="header">
+                <h1><i class="fas fa-clinic-medical"></i> Medical Assistant Dashboard</h1>
+                <div class="pulse-icon">❤️</div>
+            </div>
+
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(44, 123, 229, 0.1); color: var(--primary-color);">
+                        <i class="fas fa-user-md"></i>
+                    </div>
+                    <div>
+                        <h3>Chat Consultations</h3>
+                        <p>24/7 Available</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(39, 174, 96, 0.1); color: var(--secondary-color);">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <div>
+                        <h3>Health Analysis</h3>
+                        <p>AI-Powered</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="medical-info">
+                <h3><i class="fas fa-info-circle"></i> Important Notice</h3>
+                <p>This is an AI-assisted medical consultation tool. For emergencies, please contact your local emergency services immediately.</p>
+            </div>
         </div>
 
-        <h2>Symptom Diagnosis</h2>
-        <div id="diagnosis-container">
-            <textarea id="symptoms-input" placeholder="Enter symptoms..."></textarea>
-            <div id="diagnosis-error" class="error"></div>
-            <button id="diagnose-button">Get Diagnosis</button>
-            <div id="diagnosis-result"></div>
+        <!-- Chatbot page -->
+        <div id="chatbot-page">
+            <div id="chat-container">
+                <h2><i class="fas fa-comments"></i> Medical Chatbot</h2>
+                <div id="chat-messages"></div>
+                <div id="chat-error" class="error"></div>
+                <div class="input-group">
+                    <input type="text" id="chat-input" placeholder="Describe your symptoms...">
+                    <button id="send-button"><i class="fas fa-paper-plane"></i> Send</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Diagnosis page -->
+        <div id="diagnosis-page">
+            <div id="diagnosis-container">
+                <h2><i class="fas fa-stethoscope"></i> Symptom Diagnosis</h2>
+                <textarea id="symptoms-input" placeholder="Enter detailed symptoms..."></textarea>
+                <div id="diagnosis-error" class="error"></div>
+                <button id="diagnose-button"><i class="fas fa-search-plus"></i> Analyze Symptoms</button>
+                <div id="diagnosis-result"></div>
+            </div>
         </div>
     </div>
 
     <script>
         $(document).ready(function() {
+            // Hide or show pages on nav click
+            $('.nav-item').click(function() {
+                const target = $(this).data('target');
+                $('#home-page, #chatbot-page, #diagnosis-page').hide();
+                $(target).show();
+            });
+
             $('#send-button').click(function() {
                 sendMessage();
             });
