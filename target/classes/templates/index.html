@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Medical Assistant</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f7fa;
+            color: #2c3e50;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h2 {
+            color: #3498db;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-top: 30px;
+        }
+
+        .error { 
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 10px 0;
+            display: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        #chat-container, #diagnosis-container { 
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin: 20px 0;
+            padding: 25px;
+        }
+
+        #chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            padding: 20px;
+            background-color: #fff;
+            margin-bottom: 15px;
+        }
+
+        #chat-messages p {
+            margin: 8px 0;
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+
+        #chat-messages p:nth-child(odd) {
+            background-color: #f8f9fa;
+        }
+
+        input[type="text"], textarea {
+            width: calc(100% - 120px);
+            padding: 12px;
+            border: 1px solid #dce4ec;
+            border-radius: 6px;
+            margin-right: 10px;
+            font-size: 14px;
+        }
+
+        textarea {
+            width: calc(100% - 24px);
+            min-height: 100px;
+            margin-bottom: 15px;
+            resize: vertical;
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        #diagnosis-result {
+            white-space: pre-wrap;
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border: 1px solid #e1e8ed;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .disclaimer {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            border-radius: 8px;
+            color: #856404;
+            position: relative;
+            padding-left: 45px;
+        }
+
+        .disclaimer:before {
+            content: "⚠️";
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+        }
+
+        .error.show {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .processing {
+            text-align: center;
+            padding: 20px;
+            color: #3498db;
+        }
+
+        .processing:after {
+            content: "...";
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: "."; }
+            40% { content: ".."; }
+            60%, 100% { content: "..."; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Medical Chatbot</h2>
+        <div id="chat-container">
+            <div id="chat-messages"></div>
+            <div id="chat-error" class="error"></div>
+            <input type="text" id="chat-input" placeholder="Ask about symptoms or medications...">
+            <button id="send-button">Send</button>
+        </div>
+
+        <h2>Symptom Diagnosis</h2>
+        <div id="diagnosis-container">
+            <textarea id="symptoms-input" placeholder="Enter symptoms..."></textarea>
+            <div id="diagnosis-error" class="error"></div>
+            <button id="diagnose-button">Get Diagnosis</button>
+            <div id="diagnosis-result"></div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#send-button').click(function() {
+                sendMessage();
+            });
+
+            $('#chat-input').keypress(function(e) {
+                if (e.which == 13) {
+                    sendMessage();
+                }
+            });
+
+            $('#diagnose-button').click(function() {
+                getDiagnosis();
+            });
+
+            function showError(element, message) {
+                element.text(message)
+                      .addClass('show');
+            }
+
+            function sendMessage() {
+                const message = $('#chat-input').val();
+                if (!message) return;
+
+                $('#chat-error').removeClass('show');
+                $.ajax({
+                    url: '/api/chat',
+                    method: 'POST',
+                    data: message,
+                    contentType: 'text/plain',
+                    dataType: 'text',
+                    success: function(response) {
+                        const cleanedResponse = response.replace(/^Error:\s*/i, '').trim();
+                        $('#chat-messages').append(`<p><strong>You:</strong> ${message}</p>`);
+                        $('#chat-messages').append(`<p><strong>Bot:</strong> ${cleanedResponse}</p>`);
+                        $('#chat-input').val('');
+                        $('#chat-messages').scrollTop($('#chat-messages')[0].scrollHeight);
+                    },
+                    error: function(xhr, status, error) {
+                        showError($('#chat-error'), 'Error: ' + (error || 'Failed to send message'));
+                    }
+                });
+            }
+
+            function getDiagnosis() {
+                const symptoms = $('#symptoms-input').val();
+                if (!symptoms) return;
+
+                $('#diagnosis-error').removeClass('show');
+                $('#diagnosis-result').html('<p class="processing">Analyzing symptoms</p>');
+
+                $.ajax({
+                    url: '/api/diagnose',
+                    method: 'POST',
+                    data: symptoms,
+                    contentType: 'text/plain',
+                    dataType: 'text',
+                    success: function(response) {
+                        const cleanedResponse = response.replace(/^Error:\s*/i, '').trim();
+                        const formatted = cleanedResponse
+                            .replace(/--- Disclaimer ---/g, '<div class="disclaimer">');
+                        $('#diagnosis-result').html(formatted.split('\n').map(line =>
+                            line.trim() ? `<p>${line}</p>` : ''
+                        ).join(''));
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
