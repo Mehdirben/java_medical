@@ -13,6 +13,11 @@
             --background: #f8fafb;
         }
 
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             margin: 0;
@@ -409,6 +414,10 @@
                         $('#diagnosis-result').html(formatted.split('\n').map(line =>
                             line.trim() ? `<p>${line}</p>` : ''
                         ).join(''));
+                    },
+                    error: function(xhr, status, error) {
+                        showError($('#diagnosis-error'), 'Error: ' + (error || 'Failed to diagnose.'));
+                        $('#diagnosis-result').html(''); // Clear the analyzing message
                     }
                 });
             }
