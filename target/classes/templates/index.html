@@ -279,6 +279,12 @@
         }
 
         /* Add media queries for responsiveness */
+        @media (max-width: 992px) {
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
         @media (max-width: 768px) {
             body {
                 flex-direction: column;
@@ -288,16 +294,104 @@
                 width: 100%;
                 min-height: auto;
                 padding: 1rem;
+                position: sticky;
+                top: 0;
+                z-index: 100;
+            }
+
+            .sidebar-logo {
+                margin-bottom: 1rem;
+            }
+
+            .nav-item {
+                padding: 0.75rem;
+                margin: 0.25rem 0;
+                font-size: 0.9rem;
             }
 
             .main-content {
                 height: auto;
-                min-height: calc(100vh - 200px);
+                min-height: calc(100vh - 120px);
+                padding: 0.75rem;
+            }
+
+            .header {
+                padding: 0.75rem 1rem;
+                margin-top: 1rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .stats-container {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+
+            .stat-card {
+                padding: 1rem;
             }
 
             #chat-container, #diagnosis-container {
                 margin: 0.5rem 0;
                 padding: 1rem;
+            }
+
+            #chat-messages {
+                height: 300px;
+            }
+
+            .input-group {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .input-group input[type="text"],
+            .input-group button,
+            #symptoms-input,
+            #diagnose-button {
+                width: 100%;
+                padding: 0.75rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar-logo h2 {
+                font-size: 1.25rem;
+            }
+
+            .medical-info {
+                padding: 1rem;
+            }
+
+            #chat-messages p {
+                padding: 0.75rem;
+                font-size: 0.9rem;
+                margin: 0.25rem 0;
+            }
+
+            #chat-messages p:nth-child(odd),
+            #chat-messages p:nth-child(even) {
+                margin-left: 1rem;
+                margin-right: 1rem;
+            }
+        }
+
+        /* Add this to handle landscape orientation on mobile */
+        @media (max-height: 480px) and (orientation: landscape) {
+            .sidebar {
+                position: static;
+            }
+
+            #chat-messages {
+                height: 200px;
+            }
+
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
