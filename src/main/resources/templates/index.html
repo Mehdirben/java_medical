@@ -243,6 +243,7 @@
             font-size: 1rem;
             background: #fff;
             min-height: 150px;
+            resize: none; /* Prevent resizing */
         }
 
         #chat-loading {
@@ -251,6 +252,19 @@
             margin: 1rem 0;
             font-size: 1rem;
             color: var(--primary-color);
+        }
+
+        #diagnosis-loading {
+            display: none;
+            text-align: center;
+            margin: 1rem 0;
+            font-size: 1rem;
+            color: var(--primary-color);
+        }
+
+        #diagnosis-result {
+            max-height: 300px;
+            overflow-y: auto;
         }
     </style>
 </head>
@@ -333,6 +347,9 @@
                 <textarea id="symptoms-input" placeholder="Enter detailed symptoms..."></textarea>
                 <div id="diagnosis-error" class="error"></div>
                 <button id="diagnose-button"><i class="fas fa-search-plus"></i> Analyze Symptoms</button>
+                <div id="diagnosis-loading">
+                    <i class="fas fa-spinner fa-spin"></i> Analyzing...
+                </div>
                 <div id="diagnosis-result"></div>
             </div>
         </div>
@@ -399,7 +416,8 @@
                 if (!symptoms) return;
 
                 $('#diagnosis-error').removeClass('show');
-                $('#diagnosis-result').html('<p class="processing">Analyzing symptoms</p>');
+                $('#diagnosis-result').html(''); // Remove the "Analyzing symptoms" text
+                $('#diagnosis-loading').show();   // Show loading spinner
 
                 $.ajax({
                     url: '/api/diagnose',
@@ -408,6 +426,7 @@
                     contentType: 'text/plain',
                     dataType: 'text',
                     success: function(response) {
+                        $('#diagnosis-loading').hide(); // Hide on success
                         const cleanedResponse = response.replace(/^Error:\s*/i, '').trim();
                         const formatted = cleanedResponse
                             .replace(/--- Disclaimer ---/g, '<div class="disclaimer">');
@@ -416,6 +435,7 @@
                         ).join(''));
                     },
                     error: function(xhr, status, error) {
+                        $('#diagnosis-loading').hide(); // Hide on error
                         showError($('#diagnosis-error'), 'Error: ' + (error || 'Failed to diagnose.'));
                         $('#diagnosis-result').html(''); // Clear the analyzing message
                     }
