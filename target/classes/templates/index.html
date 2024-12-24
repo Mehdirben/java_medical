@@ -15,7 +15,7 @@
 
         html, body {
             height: 100%;
-            overflow: hidden;
+            min-height: 100vh;
         }
 
         body {
@@ -67,6 +67,8 @@
             flex: 1; /* let main-content expand */
             margin: 0; /* remove margin-left: 250px */
             padding: 1rem; /* Reduced from 2rem */
+            overflow-y: auto;
+            height: 100vh;
         }
 
         .header {
@@ -177,6 +179,14 @@
             border-top-right-radius: 0;
         }
 
+        #chat-messages p.bot-typing {
+            background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+            color: var(--primary-color);
+            font-style: italic;
+            margin-left: 2rem;
+            padding: 0.5rem 1rem;
+        }
+
         .medical-info {
             background: white;
             padding: 1.5rem;
@@ -267,6 +277,29 @@
             max-height: 300px;
             overflow-y: auto;
         }
+
+        /* Add media queries for responsiveness */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                min-height: auto;
+                padding: 1rem;
+            }
+
+            .main-content {
+                height: auto;
+                min-height: calc(100vh - 200px);
+            }
+
+            #chat-container, #diagnosis-container {
+                margin: 0.5rem 0;
+                padding: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -331,9 +364,6 @@
                 <h2><i class="fas fa-comments"></i> Medical Chatbot</h2>
                 <div id="chat-messages"></div>
                 <div id="chat-error" class="error"></div>
-                <div id="chat-loading">
-                    <i class="fas fa-spinner fa-spin"></i> Loading...
-                </div>
                 <div class="input-group">
                     <input type="text" id="chat-input" placeholder="Describe your symptoms...">
                     <button id="send-button"><i class="fas fa-paper-plane"></i> Send</button>
@@ -399,7 +429,9 @@
                 $('#chat-messages').append(`<p><strong>You:</strong> ${message}</p>`);
                 $('#chat-input').val('');
                 $('#chat-error').removeClass('show');
-                $('#chat-loading').show();
+
+                // Instead of showing a separate 'loading' element, add a "typing" message to the chat
+                $('#chat-messages').append('<p class="bot-typing"><i class="fas fa-spinner fa-spin"></i> Bot is typing...</p>');
 
                 $.ajax({
                     url: '/api/chat',
@@ -408,13 +440,14 @@
                     contentType: 'text/plain',
                     dataType: 'text',
                     success: function(response) {
-                        $('#chat-loading').hide(); // Hide on success
+                        // Remove loading message first
+                        $('#chat-messages .bot-typing').remove();
                         const cleanedResponse = response.replace(/^Error:\s*/i, '').trim();
                         $('#chat-messages').append(`<p><strong>Bot:</strong> ${cleanedResponse}</p>`);
                         $('#chat-messages').scrollTop($('#chat-messages')[0].scrollHeight);
                     },
                     error: function(xhr, status, error) {
-                        $('#chat-loading').hide(); // Hide on error
+                        $('#chat-messages .bot-typing').remove();
                         showError($('#chat-error'), 'Error: ' + (error || 'Failed to send message'));
                     }
                 });
