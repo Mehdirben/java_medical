@@ -1,5 +1,0 @@
-com\medical\controller\MedicalController.class
-com\medical\MedicalApplication.class
-com\medical\service\DiagnosisService.class
-com\medical\config\WebConfig.class
-com\medical\service\ChatbotService.class
