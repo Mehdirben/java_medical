@@ -216,6 +216,37 @@
         #chat-container p, #diagnosis-container p {
             margin-bottom: 1.2rem;
         }
+
+        .input-group {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .input-group input[type="text"] {
+            width: 100%;
+            padding: 1rem;
+            box-sizing: border-box;
+            font-size: 1rem;
+            background: #fff;
+        }
+
+        #symptoms-input {
+            width: 100%;
+            padding: 1rem;
+            box-sizing: border-box;
+            font-size: 1rem;
+            background: #fff;
+            min-height: 150px;
+        }
+
+        #chat-loading {
+            display: none;
+            text-align: center;
+            margin: 1rem 0;
+            font-size: 1rem;
+            color: var(--primary-color);
+        }
     </style>
 </head>
 <body>
@@ -280,6 +311,9 @@
                 <h2><i class="fas fa-comments"></i> Medical Chatbot</h2>
                 <div id="chat-messages"></div>
                 <div id="chat-error" class="error"></div>
+                <div id="chat-loading">
+                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                </div>
                 <div class="input-group">
                     <input type="text" id="chat-input" placeholder="Describe your symptoms...">
                     <button id="send-button"><i class="fas fa-paper-plane"></i> Send</button>
@@ -332,6 +366,8 @@
                 if (!message) return;
 
                 $('#chat-error').removeClass('show');
+                $('#chat-loading').show(); // Show loading indicator
+
                 $.ajax({
                     url: '/api/chat',
                     method: 'POST',
@@ -339,6 +375,7 @@
                     contentType: 'text/plain',
                     dataType: 'text',
                     success: function(response) {
+                        $('#chat-loading').hide(); // Hide on success
                         const cleanedResponse = response.replace(/^Error:\s*/i, '').trim();
                         $('#chat-messages').append(`<p><strong>You:</strong> ${message}</p>`);
                         $('#chat-messages').append(`<p><strong>Bot:</strong> ${cleanedResponse}</p>`);
@@ -346,6 +383,7 @@
                         $('#chat-messages').scrollTop($('#chat-messages')[0].scrollHeight);
                     },
                     error: function(xhr, status, error) {
+                        $('#chat-loading').hide(); // Hide on error
                         showError($('#chat-error'), 'Error: ' + (error || 'Failed to send message'));
                     }
                 });
